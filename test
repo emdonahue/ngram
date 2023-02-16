@@ -1,0 +1,23 @@
+#!/bin/zsh
+
+assert() {
+       if [[ "$2" != "$3" ]]; then
+       	   echo "Failure: $1\n\tExpected: $3\n\tReceived: $2"
+	   ERR=1
+       fi
+}
+
+assert 'unigrams' "$(./ngram <(echo 'a b c'))" "$(echo 'a\nb\nc')"
+assert 'left pad bigrams' "$(./ngram -l1 -n2 <(echo 'a\nb\nc'))" "$(echo '_ a\n_ b\n_ c')"
+assert 'custom left pad bigrams' "$(./ngram -l1 -n2 -px <(echo 'a\nb\nc'))" "$(echo 'x a\nx b\nx c')"
+assert 'right pad bigrams' "$(./ngram -r1 -n2 <(echo 'a\nb\nc'))" "$(echo 'a _\nb _\nc _')"
+#assert 'skipgrams' "$(./ngram -s <(echo 'a b c'))" "$(echo 'a b\nb a\nb c\nc b')"
+#assert 'skipgrams with padding' "$(./ngram -spP <(echo 'a b c'))" "$(echo 'P a\na P\na b\nb a\nb c\nc b\nc P\nP c')"
+#assert 'skipgrams n=2' "$(./ngram -sn2 <(echo 'a b c'))" "$(echo 'a b\nb a\na c\nc a\nb c\nc b')"
+
+
+
+
+
+[[ -z "$ERR" ]] && echo "All Tests Pass"
+exit "$ERR"

@@ -1,0 +1,30 @@
+#!/bin/zsh
+
+#TODO help print
+#TODO reset ngrams after newlines to allow for per-document ngrams
+
+set -o errexit
+set -o pipefail
+if [[ "${TRACE-0}" == "1" ]]; then set -o xtrace; fi
+
+unset c #Reserved inline comment variable
+
+zparseopts -A opts -F -D h=HELP ${c#; Prints this help menu}\
+	   l:=LEFTPAD ${c#LEFTPADDING; Amount of left padding at the beginning of lines}\
+	   n:=N ${c#N; N of ngram}\
+	   p:=PADCHAR ${c#PADCHAR; Character to use for padding. Defaults to _}\
+	   r:=RIGHTPAD ${c#RIGHTPADDING; Amount of right padding at the end of lines}\
+	   s:=SKIPLEN ${c#SKIPLEN; Enables skipgrams of skip length SKIPLEN}
+
+if [[ "${#HELP}" -eq 1 ]]; then
+    echo 'help nyi'
+    exit
+fi
+
+#if [[ "$SKIP" -eq 1 ]]; then
+#    tr -s '[:space:]' '\n' < "${1:-/dev/fd/0}" | awk -vN="$N" -vPADDING="$PADDING" 'BEGIN {for (i=1;i<=N && PADDING;i++) c[i]=PADDING} $1 {for (i=1;i<=N;i++){ if(c[i]){ print c[i],$0; print $0,c[i]}; c[i]=c[i+1] }; c[N]=$0; } END {for (i=1;i<=N && PADDING;i++){ if(c[i]){ print c[i],PADDING; print PADDING,c[i]}}}'
+#else
+
+awk -vRS='[[:space:][:cntrl:]]+' -vN="${N[2]:-1}" -vSKIP="${SKIPLEN[2]:-0}" -vPADC="${PADCHAR[2]:-_}" -vL="${LEFTPAD[2]:-0}" -vR="${RIGHTPAD[2]:-0}" 'BEGIN {left_pad()} $0 {add_word($0); print_ngram()} "\n"==RT {right_pad(); delete words; left_pad()} function add_word(w, i){for (i=N+SKIP; 1<i; i--){words[i-1]=words[i]}; words[N+SKIP]=w} function print_ngram( i){for (i=1;i<=N+SKIP && words[i];i++){printf("%s%s",words[i],N+SKIP==i?"\n":" ")}} function left_pad( i){for (i=0;i<L;i++){add_word(PADC)}} function right_pad( i){for (i=0;i<R;i++){add_word(PADC); print_ngram()}}' "${1:--}"
+
+#fi
