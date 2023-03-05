@@ -22,8 +22,8 @@ if [[ "${#HELP}" -eq 1 ]]; then
 fi
 
 awk -vN=2 -vSKIP=1 -f - <<'EOF'
-BEGIN {split("a,b,c,d,e",words,",");  delete gram; print_ngram(1)} 
-function print_ngram(st, i) { 
+BEGIN {split("a,b,c",words,",");  delete gram; print_ngram(1,0)} 
+function print_ngram(st) { 
 	 print "st",st,"gram",length(gram);	 
 	 if (length(gram)==N){
 	    print_it();
