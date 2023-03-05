@@ -21,10 +21,45 @@ if [[ "${#HELP}" -eq 1 ]]; then
     exit
 fi
 
-#if [[ "$SKIP" -eq 1 ]]; then
-#    tr -s '[:space:]' '\n' < "${1:-/dev/fd/0}" | awk -vN="$N" -vPADDING="$PADDING" 'BEGIN {for (i=1;i<=N && PADDING;i++) c[i]=PADDING} $1 {for (i=1;i<=N;i++){ if(c[i]){ print c[i],$0; print $0,c[i]}; c[i]=c[i+1] }; c[N]=$0; } END {for (i=1;i<=N && PADDING;i++){ if(c[i]){ print c[i],PADDING; print PADDING,c[i]}}}'
-#else
+awk -vN=2 -vSKIP=1 -f - <<'EOF'
+BEGIN {split("a,b,c,d,e",words,",");  delete gram; print_ngram(1)} 
+function print_ngram(st, i) { 
+	 print "st",st,"gram",length(gram)
+	 if (st>length(words)) return;
+	 if (length(gram)==N){
+	    print_it();
+	    return;
+	 }
+	 gram[length(gram)+1]=words[st];
+	 print_ngram(st+1);
+	 delete gram[length(gram)];
+	 print_ngram(st+1)
+	 
 
-awk -vRS='[[:space:][:cntrl:]]+' -vN="${N[2]:-1}" -vSKIP="${SKIPLEN[2]:-0}" -vPADC="${PADCHAR[2]:-_}" -vL="${LEFTPAD[2]:-0}" -vR="${RIGHTPAD[2]:-0}" 'BEGIN {left_pad()} $0 {add_word($0); print_ngram()} "\n"==RT {right_pad(); delete words; left_pad()} function add_word(w, i){for (i=N+SKIP; 1<i; i--){words[i-1]=words[i]}; words[N+SKIP]=w} function print_ngram( i){for (i=1;i<=N+SKIP && words[i];i++){printf("%s%s",words[i],N+SKIP==i?"\n":" ")}} function left_pad( i){for (i=0;i<L;i++){add_word(PADC)}} function right_pad( i){for (i=0;i<R;i++){add_word(PADC); print_ngram()}}' "${1:--}"
+}
+function print_it() {
+	  print gram[1]" "gram[2]"\n"
+}
+EOF
 
-#fi
+exit
+awk -vRS='[[:space:][:cntrl:]]+' -vN="${N[2]:-1}" -vSKIP="${SKIPLEN[2]:-0}" -vPADC="${PADCHAR[2]:-_}" -vL="${LEFTPAD[2]:-0}" -vR="${RIGHTPAD[2]:-0}" -f <(cat <<'EOF'
+BEGIN {left_pad()} 
+$0 {add_word($0); print_ngram()} 
+"\n"==RT {right_pad(); delete words; left_pad()} 
+function add_word(w, i){
+	 for (i=N+SKIP; 1<i; i--){
+	     words[i-1]=words[i]}; 
+	     words[N+SKIP]=w} 
+function left_pad( i){
+	 for (i=0;i<L;i++){
+	     add_word(PADC)}} 
+function right_pad( i){
+	 for (i=0;i<R;i++){
+	     add_word(PADC); 
+	     print_ngram()}}
+function print_ngram( i){
+	 for (i=1;i<=N+SKIP && words[i];i++){
+	     printf("%s%s",words[i],N+SKIP==i?"\n":" ")}}
+EOF
+) "${1:--}"
