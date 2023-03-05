@@ -24,10 +24,13 @@ fi
 awk -vN=2 -vSKIP=1 -f - <<'EOF'
 BEGIN {split("a,b,c,d,e",words,",");  delete gram; print_ngram(1)} 
 function print_ngram(st, i) { 
-	 print "st",st,"gram",length(gram)
-	 if (st>length(words)) return;
+	 print "st",st,"gram",length(gram);	 
 	 if (length(gram)==N){
 	    print_it();
+	    return;
+	 }
+	 if (st>length(words)) {
+	    print "out of window";
 	    return;
 	 }
 	 gram[length(gram)+1]=words[st];
