@@ -1,7 +1,6 @@
 #!/bin/zsh
 
-#TODO help print
-#TODO reset ngrams after newlines to allow for per-document ngrams
+#TODO Make RIGHTPAD explicit length optional and default to computing enough padding to make every word ngram-initial
 
 set -o errexit
 set -o pipefail
