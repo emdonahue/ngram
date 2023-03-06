@@ -22,7 +22,7 @@ if [[ "${#HELP}" -eq 1 ]]; then
 fi
 
 awk -vRS='[[:space:][:cntrl:]]+' -vN="${N[2]:-1}" -vSKIP="${SKIPLEN[2]:-0}" -vPADC="${PADCHAR[2]:-_}" -vL="${LEFTPAD[2]:-0}" -vR="${RIGHTPAD[2]:-0}" -f <(cat <<'EOF'
-BEGIN {left_pad(); delete words} 
+BEGIN {delete words; left_pad()} 
 $0 {add_word($0); generate_ngrams(words)} 
 "\n"==RT {right_pad(); delete words; left_pad()} 
 function add_word(w, i){
@@ -30,10 +30,10 @@ function add_word(w, i){
 	 words[N+SKIP]=w} 
 function left_pad( i){
 	 for (i=0;i<L;i++){
-	     add_word(PADC,ngram)}} 
+	     add_word(PADC)}} 
 function right_pad( i){
 	 for (i=0;i<R;i++){
-	     add_word(PADC,ngram); 
+	     add_word(PADC); 
 	     generate_ngrams(words)}}
 function generate_ngrams(words, ngram){
 	 delete ngram;
