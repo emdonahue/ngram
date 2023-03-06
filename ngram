@@ -21,48 +21,32 @@ if [[ "${#HELP}" -eq 1 ]]; then
     exit
 fi
 
-awk -vN=2 -vSKIP=1 -f - <<'EOF'
-BEGIN {split("a,b,c",words,",");  delete gram; print_ngram(1,0)} 
-function print_ngram(st) { 
-	 print "st",st,"gram",length(gram);	 
-	 if (length(gram)==N){
-	    print_it();
-	    return;
-	 }
-	 if (st>length(words)) {
-	    print "out of window";
-	    return;
-	 }
-	 gram[length(gram)+1]=words[st];
-	 print_ngram(st+1);
-	 delete gram[length(gram)];
-	 print_ngram(st+1)
-	 
-
-}
-function print_it() {
-	  print gram[1]" "gram[2]"\n"
-}
-EOF
-
-exit
 awk -vRS='[[:space:][:cntrl:]]+' -vN="${N[2]:-1}" -vSKIP="${SKIPLEN[2]:-0}" -vPADC="${PADCHAR[2]:-_}" -vL="${LEFTPAD[2]:-0}" -vR="${RIGHTPAD[2]:-0}" -f <(cat <<'EOF'
 BEGIN {left_pad()} 
-$0 {add_word($0); print_ngram()} 
+$0 {add_word($0,ngram); generate_ngrams(words,ngram,1)} 
 "\n"==RT {right_pad(); delete words; left_pad()} 
-function add_word(w, i){
+function add_word(w,ngram, i){
+	 delete ngram; 
 	 for (i=N+SKIP; 1<i; i--){
 	     words[i-1]=words[i]}; 
 	     words[N+SKIP]=w} 
 function left_pad( i){
 	 for (i=0;i<L;i++){
-	     add_word(PADC)}} 
+	     add_word(PADC,ngram)}} 
 function right_pad( i){
 	 for (i=0;i<R;i++){
-	     add_word(PADC); 
-	     print_ngram()}}
-function print_ngram( i){
-	 for (i=1;i<=N+SKIP && words[i];i++){
-	     printf("%s%s",words[i],N+SKIP==i?"\n":" ")}}
+	     add_word(PADC,ngram); 
+	     generate_ngrams(words,ngram,1)}}
+function generate_ngrams(words,ngram,st){
+	 if (length(ngram)==N) return print_ngram(ngram);
+	 if (length(words)<st || !words[1]) return;
+	 ngram[length(ngram)+1]=words[st];
+	 generate_ngrams(words,ngram,st+1);
+	 delete ngram[length(ngram)];
+	 generate_ngrams(words,ngram,st+1);
+}
+function print_ngram(ngram, i){
+	 for (i=1;i<=length(ngram);i++){
+	     printf("%s%s",ngram[i],length(ngram)==i?"\n":" ")}}
 EOF
 ) "${1:--}"
