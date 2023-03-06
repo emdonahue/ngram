@@ -17,7 +17,8 @@ zparseopts -A opts -F -D h=HELP ${c#; Prints this help menu}\
 	   s:=SKIPLEN ${c#SKIPLEN; Enables skipgrams of skip length SKIPLEN}
 
 if [[ "${#HELP}" -eq 1 ]]; then
-    echo 'help nyi'
+    echo 'ngram - A commandline utility for generating ngrams and skipgrams from text files.\nUsage: ngram [OPTIONS...] [FILE...]\n\nOptions:'
+    sed -nE 's/.*(\w+)[-+:]*=\w+ \$\{c#(.*); (.*)\}.*/\t-\1 \2\t\3/p' "$0"
     exit
 fi
 
@@ -51,4 +52,4 @@ function print_ngram(ngram, i){
 	 for (i=1;i<=length(ngram);i++){
 	     printf("%s%s",ngram[i],length(ngram)==i?"\n":" ")}}
 EOF
-) "${1:--}"
+) "$@"
