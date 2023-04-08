@@ -10,6 +10,8 @@ assert() {
 assert 'unigrams' "$(./ngram <(echo 'a b c'))" "$(echo 'a\nb\nc')"
 assert 'unigrams stdin' "$(echo 'a b c' | ./ngram)" "$(echo 'a\nb\nc')"
 assert 'unigrams multifile' "$(./ngram <(echo 'a') <(echo 'b c'))" "$(echo 'a\nb\nc')"
+assert 'bigrams' "$(./ngram -n2 <(echo 'a b c'))" "$(echo 'a b\nb c')"
+assert 'unordered bigrams' "$(./ngram -un2 <(echo 'a b c b a'))" "$(echo 'a b\nb c\nb c\na b')"
 assert 'left pad bigrams' "$(./ngram -l1 -n2 <(echo 'a\nb\nc'))" "$(echo '_ a\n_ b\n_ c')"
 assert 'custom left pad bigrams' "$(./ngram -l1 -n2 -px <(echo 'a\nb\nc'))" "$(echo 'x a\nx b\nx c')"
 assert 'right pad bigrams' "$(./ngram -r1 -n2 <(echo 'a\nb\nc'))" "$(echo 'a _\nb _\nc _')"

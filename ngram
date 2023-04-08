@@ -9,11 +9,12 @@ if [[ "${TRACE-0}" == "1" ]]; then set -o xtrace; fi
 unset c #Reserved inline comment variable
 
 zparseopts -A opts -F -D h=HELP ${c#; Prints this help menu}\
-	   l:=LEFTPAD ${c#LEFTPADDING; Amount of left padding at the beginning of lines}\
 	   n:=N ${c#N; N of ngram}\
+	   s:=SKIPLEN ${c#SKIPLEN; Enables skipgrams of skip length SKIPLEN}\
+	   u=UNORDERED ${c#; Unordered. Prints ngrams in alphabetical order regardless of ordere encountered in the text.}\
 	   p:=PADCHAR ${c#PADCHAR; Character to use for padding. Defaults to _}\
-	   r:=RIGHTPAD ${c#RIGHTPADDING; Amount of right padding at the end of lines}\
-	   s:=SKIPLEN ${c#SKIPLEN; Enables skipgrams of skip length SKIPLEN}
+	   l:=LEFTPAD ${c#LEFTPADDING; Amount of left padding at the beginning of lines}\
+	   r:=RIGHTPAD ${c#RIGHTPADDING; Amount of right padding at the end of lines}	   
 
 if [[ "${#HELP}" -eq 1 ]]; then
     echo 'ngram - A commandline utility for generating ngrams and skipgrams from text files.\nUsage: ngram [OPTIONS...] [FILE...]\n\nOptions:'
@@ -21,7 +22,7 @@ if [[ "${#HELP}" -eq 1 ]]; then
     exit
 fi
 
-awk -vRS='[[:space:][:cntrl:]]+' -vN="${N[2]:-1}" -vSKIP="${SKIPLEN[2]:-0}" -vPADC="${PADCHAR[2]:-_}" -vL="${LEFTPAD[2]:-0}" -vR="${RIGHTPAD[2]:-0}" -f <(cat <<'EOF'
+awk -vRS='[[:space:][:cntrl:]]+' -vN="${N[2]:-1}" -vSKIP="${SKIPLEN[2]:-0}" -vUNORDERED="$#UNORDERED" -vPADC="${PADCHAR[2]:-_}" -vL="${LEFTPAD[2]:-0}" -vR="${RIGHTPAD[2]:-0}" -f <(cat <<'EOF'
 BEGIN {delete words; left_pad()} 
 $0 {add_word($0); generate_ngrams(words)} 
 "\n"==RT {right_pad(); delete words; left_pad()} 
@@ -37,18 +38,19 @@ function right_pad( i){
 	     generate_ngrams(words)}}
 function generate_ngrams(words, ngram){
 	 delete ngram;
-	 _generate_ngrams(words,ngram,1);
-}
+	 _generate_ngrams(words,ngram,1);}
 function _generate_ngrams(words,ngram,st){
 	 if (length(ngram)==N) return print_ngram(ngram);
 	 if (length(words)<st || !words[1]) return;
 	 ngram[length(ngram)+1]=words[st];
 	 _generate_ngrams(words,ngram,st+1);
 	 delete ngram[length(ngram)];
-	 _generate_ngrams(words,ngram,st+1);
-}
-function print_ngram(ngram, i){
-	 for (i=1;i<=length(ngram);i++){
-	     printf("%s%s",ngram[i],length(ngram)==i?"\n":" ")}}
+	 _generate_ngrams(words,ngram,st+1);}
+function print_ngram(ngram, i, sorted){
+	 if (UNORDERED) { asort(ngram,sorted); print_array(sorted); }
+	 else print_array(ngram);}
+function print_array(arr,  i){
+	 for (i=1;i<=length(arr);i++){
+	     printf("%s%s",arr[i],length(arr)==i?"\n":" ")}}
 EOF
 ) "$@"
