@@ -25,34 +25,47 @@ fi
 #words - the moving window of tokens
 #ngram - the N-sized ngram array
 awk -vRS='[[:space:][:cntrl:]]+' -vN="${N[2]:-1}" -vSKIP="${SKIPLEN[2]:-0}" -vUNORDERED="$#UNORDERED" -vPADC="${PADCHAR[2]:-_}" -vL="${LEFTPAD[2]:-0}" -vR="${RIGHTPAD[2]:-0}" -f <(cat <<'EOF'
-BEGIN {delete words; left_pad()} 
-$0 {add_word($0); generate_ngrams(words)} 
-"\n"==RT {right_pad(); delete words; left_pad()} 
-function add_word(w, i){
+BEGIN {delete words; left_pad(); "start by generating any initial padding"}
+
+$0 {add_word($0); generate_ngrams(words); "for each non blank word, add it and print the ngrams"}
+
+"\n"==RT {right_pad(); finish_window(); delete words; left_pad(); "every newline, generate right padding, print sub-window skipgrams, reset the window, and add new left padding"}
+
+function add_word(w, i){ "add a word to the end of the window and shift everything one over, dropping first"
 	 for (i=2; i<=N+SKIP; i++) words[i-1]=words[i];
 	 words[N+SKIP]=w} 
-function left_pad( i){
-	 for (i=0;i<L;i++){
-	     add_word(PADC)}} 
-function right_pad( i){
+
+function left_pad( i){ "add the padding character to the window L times before beginning the line"
+	 for (i=0;i<L;i++) add_word(PADC)} 
+
+function right_pad( i){ "add the padding character to the window R times after ending the line"
 	 for (i=0;i<R;i++){
 	     add_word(PADC); 
 	     generate_ngrams(words)}}
-function generate_ngrams(words, ngram){
+
+function finish_window() { "generate all remaining sub-window skip pairs after each newline"
+	 for (i=SKIP;i<=N;i++){
+	     add_word(""); 
+	     generate_ngrams(words)}}
+
+function generate_ngrams(words, ngram){ "generate all possible ngrams with words[1] as first word"
 	 if (!words[1]) return;
 	 delete ngram;
 	 ngram[1]=words[1];
 	 _generate_ngrams(words,ngram,2);}
-function _generate_ngrams(words,ngram,st){
+
+function _generate_ngrams(words,ngram,st){ "recursively build, print, and delete the ngram"
 	 if (length(ngram)==N) return print_ngram(ngram);
-	 if (length(words)<st) return;
+	 if (length(words)<st || !words[st]) return;
 	 ngram[length(ngram)+1]=words[st];
 	 _generate_ngrams(words,ngram,st+1);
 	 delete ngram[length(ngram)];
 	 _generate_ngrams(words,ngram,st+1);}
-function print_ngram(ngram, i, sorted){
+
+function print_ngram(ngram, i, sorted){ "print the ngram sorted or unsorted"
 	 if (UNORDERED) { asort(ngram,sorted); print_array(sorted); }
 	 else print_array(ngram);}
+
 function print_array(arr,  i){
 	 for (i=1;i<=length(arr);i++){
 	     printf("%s%s",arr[i],length(arr)==i?"\n":" ")}}
