@@ -22,6 +22,8 @@ if [[ "${#HELP}" -eq 1 ]]; then
     exit
 fi
 
+#words - the moving window of tokens
+#ngram - the N-sized ngram array
 awk -vRS='[[:space:][:cntrl:]]+' -vN="${N[2]:-1}" -vSKIP="${SKIPLEN[2]:-0}" -vUNORDERED="$#UNORDERED" -vPADC="${PADCHAR[2]:-_}" -vL="${LEFTPAD[2]:-0}" -vR="${RIGHTPAD[2]:-0}" -f <(cat <<'EOF'
 BEGIN {delete words; left_pad()} 
 $0 {add_word($0); generate_ngrams(words)} 
@@ -37,11 +39,13 @@ function right_pad( i){
 	     add_word(PADC); 
 	     generate_ngrams(words)}}
 function generate_ngrams(words, ngram){
+	 if (!words[1]) return;
 	 delete ngram;
-	 _generate_ngrams(words,ngram,1);}
+	 ngram[1]=words[1];
+	 _generate_ngrams(words,ngram,2);}
 function _generate_ngrams(words,ngram,st){
 	 if (length(ngram)==N) return print_ngram(ngram);
-	 if (length(words)<st || !words[1]) return;
+	 if (length(words)<st) return;
 	 ngram[length(ngram)+1]=words[st];
 	 _generate_ngrams(words,ngram,st+1);
 	 delete ngram[length(ngram)];
