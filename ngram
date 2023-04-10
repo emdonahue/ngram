@@ -29,7 +29,9 @@ BEGIN {delete words; left_pad(); "start by generating any initial padding"}
 
 $0 {add_word($0); generate_ngrams(words); "for each non blank word, add it and print the ngrams"}
 
-"\n"==RT {right_pad(); finish_window(); delete words; left_pad(); "every newline, generate right padding, print sub-window skipgrams, reset the window, and add new left padding"}
+"\n"==RT {right_pad(); flush_window(); left_pad(); "every newline, generate right padding, print sub-window skipgrams, reset the window, and add new left padding"}
+
+END {flush_window()}
 
 function add_word(w, i){ "add a word to the end of the window and shift everything one over, dropping first"
 	 for (i=2; i<=N+SKIP; i++) words[i-1]=words[i];
@@ -43,10 +45,11 @@ function right_pad( i){ "add the padding character to the window R times after e
 	     add_word(PADC); 
 	     generate_ngrams(words)}}
 
-function finish_window() { "generate all remaining sub-window skip pairs after each newline"
-	 for (i=SKIP;i<=N;i++){
+function flush_window() { "generate all remaining sub-window skip pairs after each newline"
+	 for (i=0;i<SKIP;i++){
 	     add_word(""); 
-	     generate_ngrams(words)}}
+	     generate_ngrams(words)};
+	     delete words}
 
 function generate_ngrams(words, ngram){ "generate all possible ngrams with words[1] as first word"
 	 if (!words[1]) return;

@@ -19,8 +19,10 @@ assert 'skipgrams' "$(./ngram -s1 -n2 <(echo 'a b c'))" "$(echo 'a b\na c\nb c')
 assert 'skipgrams moving window' "$(./ngram -s1 -n1 <(echo 'a b c'))" "$(echo 'a\nb\nc')"
 assert 'skipgrams long' "$(./ngram -s2 -n3 <(echo 'a b c d e'))" "$(echo 'a b c\na b d\na b e\na c d\na c e\na d e\nb c d\nb c e\nb d e\nc d e')"
 assert 'skipgrams unordered' "$(./ngram -s1 -n2 -u <(echo 'a b c'))" "$(echo 'a b\na c\nb c')"
+assert 'skipgrams unordered large window' "$(./ngram -s2 -n2 -u <(echo 'a b c d'))" "$(echo 'a b\na c\na d\nb c\nb d\nc d')"
 assert 'skipgrams unordered moving window' "$(./ngram -s1 -n2 -u <(echo 'a b c d'))" "$(echo 'a b\na c\nb c\nb d\nc d')"
 assert 'skipgrams unordered out of order' "$(./ngram -s1 -n2 -u <(echo 'a c b'))" "$(echo 'a c\na b\nb c')"
+assert 'skipgrams no newline' "$(./ngram -s2 -n2 -u <(echo -n 'a b c d'))" "$(echo 'a b\na c\na d\nb c\nb d\nc d')"
 
 [[ -z "$ERR" ]] && echo "All Tests Pass"
 exit "$ERR"
