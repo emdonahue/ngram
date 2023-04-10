@@ -11,7 +11,7 @@ unset c #Reserved inline comment variable
 zparseopts -A opts -F -D h=HELP ${c#; Prints this help menu}\
 	   n:=N ${c#N; N of ngram}\
 	   s:=SKIPLEN ${c#SKIPLEN; Enables skipgrams of skip length SKIPLEN}\
-	   u=UNORDERED ${c#; Unordered. Prints ngrams in alphabetical order regardless of ordere encountered in the text.}\
+	   u=UNORDERED ${c#; Unordered. Prints ngrams in standardized alphabetical order regardless of ordere encountered in the text.}\
 	   p:=PADCHAR ${c#PADCHAR; Character to use for padding. Defaults to _}\
 	   l:=LEFTPAD ${c#LEFTPADDING; Amount of left padding at the beginning of lines}\
 	   r:=RIGHTPAD ${c#RIGHTPADDING; Amount of right padding at the end of lines}	   

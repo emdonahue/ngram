@@ -12,7 +12,7 @@ Options:
 	-h 	Prints this help menu
 	-n N	N of ngram
 	-s SKIPLEN	Enables skipgrams of skip length SKIPLEN
-	-u 	Unordered. Prints ngrams in alphabetical order regardless of ordere encountered in the text.
+	-u 	Unordered. Prints ngrams in standardized alphabetical order regardless of ordere encountered in the text.
 	-p PADCHAR	Character to use for padding. Defaults to _
 	-l LEFTPADDING	Amount of left padding at the beginning of lines
 	-r RIGHTPADDING	Amount of right padding at the end of lines
