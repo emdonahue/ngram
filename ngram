@@ -15,7 +15,7 @@ zparseopts -A opts -F -D h=HELP ${c#; Prints this help menu}\
 	   p:=PADCHAR ${c#PADCHAR; Character to use for padding. Defaults to _}\
 	   l:=LEFTPAD ${c#LEFTPADDING; Amount of left padding at the beginning of lines}\
 	   r:=RIGHTPAD ${c#RIGHTPADDING; Amount of right padding at the end of lines}\
-           d=DISTANCE ${c#; Adds a space-separated column before each word containing the skip length to that term of the skipgram.}
+           d=DISTANCE ${c#; Adds a space-separated column after each word containing the skip length to that term of the skipgram.}
 
 if [[ "${#HELP}" -eq 1 ]]; then
     echo 'ngram - A commandline utility for generating ngrams and skipgrams from text files.\nUsage: ngram [OPTIONS...] [FILE...]\n\nOptions:'
@@ -61,7 +61,7 @@ function generate_ngrams(words, ngram){ "generate all possible ngrams with words
 function _generate_ngrams(words,ngram,st,dist){ "recursively build, print, and delete the ngram"
 	 if (length(ngram)==N) return print_ngram(ngram);
 	 if (length(words)<st || !words[st]) return;
-	 ngram[length(ngram)+1]=DISTANCE ? dist" "words[st] : words[st];
+	 ngram[length(ngram)+1]=DISTANCE ? words[st]" "dist : words[st];
 	 _generate_ngrams(words,ngram,st+1,0);
 	 delete ngram[length(ngram)];
 	 _generate_ngrams(words,ngram,st+1,dist+1);}
