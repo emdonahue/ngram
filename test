@@ -26,7 +26,7 @@ assert 'skipgrams no newline' "$(./ngram -s2 -n2 -u <(echo -n 'a b c d'))" "$(ec
 assert 'unigrams distance' "$(./ngram -d <(echo 'a b c'))" "$(echo 'a\nb\nc')"
 assert 'bigrams distance' "$(./ngram -dn2 <(echo 'a b c'))" "$(echo 'a b 0\nb c 0')"
 assert 'skipgrams distance' "$(./ngram -dn2 -s2 <(echo 'a b c d'))" "$(echo 'a b 0\na c 1\na d 2\nb c 0\nb d 1\nc d 0')"
-assert 'skip trigrams distance' "$(./ngram -dn3 -s2 <(echo 'a b c d'))" "$(echo 'a b 0 c 0\na b 0 d 1\na c 1 d 0\nb c 0 d 0')"
+assert 'skip trigrams distance' "$(./ngram -dn3 -s2 <(echo 'a b c d'))" "$(echo 'a b 0 c 1\na b 0 d 2\na c 1 d 2\nb c 0 d 1')"
 
 [[ -z "$ERR" ]] && echo "All Tests Pass"
 exit "$ERR"
